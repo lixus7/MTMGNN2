@@ -178,7 +178,7 @@ def testModel(name, mode, XS, YS):
 
 ################# python input parameters #######################
 parser = argparse.ArgumentParser()
-parser.add_argument('--adjdata',type=str,default='W_hz1.csv',help='adj data path')
+parser.add_argument('--adjdata',type=str,default='W_distance.csv',help='adj data path')
 parser.add_argument('--adjtype',type=str,default='doubletransition',help='adj type')
 parser.add_argument('--gcn_bool',default=True,help='whether to add graph convolution layer')
 parser.add_argument('--aptonly',default=False,help='whether only adaptive adj')
