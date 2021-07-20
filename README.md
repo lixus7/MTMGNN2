@@ -1,5 +1,5 @@
 # MetroPrediction
-
+************************************************************************************************************************
 
 model name : ST-GRAT 
 
@@ -8,7 +8,7 @@ github url :  https://github.com/LMissher/ST-GRAT
 paper : (CIKM 20)
 
 Park, C., Lee, C., Bahng, H., Tae, Y., Jin, S., Kim, K., ... & Choo, J. (2020, October). ST-GRAT: A novel spatio-temporal graph attention networks for accurately forecasting dynamically changing road speed. In Proceedings of the 29th ACM International Conference on Information & Knowledge Management (pp. 1215-1224).
-************************************************************
+************************************************************************************************************************
 model name : ST-CGA
 
 github url : https://github.com/jillbetty001/ST-CGA
