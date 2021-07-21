@@ -13,7 +13,7 @@ model name : ST-CGA         keras架构
 
 github url : https://github.com/jillbetty001/ST-CGA
 
-paper : (CIKM 20)
+paper : (CIKM 2020)
 
 Zhang, X., Huang, C., Xu, Y., & Xia, L. (2020, October). Spatial-temporal convolutional graph attention networks for citywide traffic flow forecasting. In Proceedings of the 29th ACM International Conference on Information & Knowledge Management (pp. 1853-1862).
 
@@ -22,6 +22,26 @@ model name : ST-MGAT       dgl库，pytorch架构
 
 github url : https://github.com/Kelang-Tian/ST-MGAT
 
-paper : (ICTAI 20)
+paper : (ICTAI 2020)
 
 Tian, K., Guo, J., Ye, K., & Xu, C. Z. (2020, November). ST-MGAT: Spatial-Temporal Multi-Head Graph Attention Networks for Traffic Forecasting. In 2020 IEEE 32nd International Conference on Tools with Artificial Intelligence (ICTAI) (pp. 714-721). IEEE.
+
+************************************************************************************************************************
+
+************************************************************************************************************************
+
+其他task GAT：
+
+************************************************************************************************************************
+
+model: MTAD-GAT    (时间序列异常检测，pytorch架构
+
+github url :  https://github.com/ML4ITS/mtad-gat-pytorch/blob/main/mtad_gat.py
+
+paper :  (ICDM 2020)
+
+Zhao, H., Wang, Y., Duan, J., Huang, C., Cao, D., Tong, Y., ... & Zhang, Q. (2020, November). Multivariate time-series anomaly detection via graph attention network. In 2020 IEEE International Conference on Data Mining (ICDM) (pp. 841-850). IEEE.
+
+************************************************************************************************************************
+
+model: 
