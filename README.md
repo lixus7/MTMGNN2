@@ -5,7 +5,7 @@ model name : ST-GRAT        参考Transformer的架构写的 ，pytorch架构
 
 github url :  https://github.com/LMissher/ST-GRAT
 
-paper : (CIKM 20)
+paper : (CIKM 2020)
 
 Park, C., Lee, C., Bahng, H., Tae, Y., Jin, S., Kim, K., ... & Choo, J. (2020, October). ST-GRAT: A novel spatio-temporal graph attention networks for accurately forecasting dynamically changing road speed. In Proceedings of the 29th ACM International Conference on Information & Knowledge Management (pp. 1215-1224).
 ************************************************************************************************************************
