@@ -50,7 +50,7 @@ class GraphAttention(nn.Module):
         print('3 leaky ReLU attn shape :',attn.shape)
         # adj
         zero_vec = -9e15*torch.ones_like(attn)
-        attn = torch.where(adj > 0, e, zero_vec)
+        attn = torch.where(adj > 0, attn, zero_vec)
 #         if adj is not None:
 #             attn += torch.where(adj > 0.0, 0.0, -1e12)
         # softmax
@@ -73,7 +73,7 @@ class GAT(nn.Module):
     """
 
     def __init__(self, device ,in_channels, embed_dim,
-                 n_heads=8, dropout=0.1, alpha=0.2, bias=True):
+                 n_heads=8, dropout=0.1, alpha=0.2, bias=True,aggregate='average'):
         """
         Args:
             aggregate='concat'
@@ -106,7 +106,7 @@ class GAT(nn.Module):
             output = torch.cat([attn(x, adj) for attn in self.attns], dim=-1)
             print('output shape:',output.shape)    #  [2, 81, 512]
         else:
-            output = torch.mean(torch.stack([attn(x, adj) for attn in self.attns],dim=0),mean=0)  #  [2, 81, 64]
+            output = torch.mean(torch.stack([attn(x, adj) for attn in self.attns]),dim=0)  #  [2, 81, 64]
             print('output shape:',output.shape)
 #             output = sum([attn(x, adj) for attn in self.attns]) / len(self.attns)
         output = F.dropout(output, self.dropout, training=self.training)   #  [2, 81, 64]
@@ -129,7 +129,7 @@ def main():
     adj = torch.Tensor(adj)
     adj = adj.to(device=device, dtype=torch.float64)
     X = torch.Tensor(torch.randn(32,81,64)).to(device)
-    model = GAT(in_channels=C,embed_dim=32,device= device).to(device)
+    model = GAT(device= device,in_channels=C,embed_dim=32,aggregate='average').to(device)
 #     model(X,adj)
     print_params('GAT1',model)
     summary(model, [(81,C),(81,81)], device=device)

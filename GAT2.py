@@ -10,7 +10,8 @@ class GraphAttention(nn.Module):
         super(GraphAttention, self).__init__()
         self.in_channels = in_channels
         self.embed_dim = embed_dim
-        self.W = nn.Parameter(torch.empty(size=(2*in_channels, embed_dim)))
+        self.W1 = nn.Parameter(torch.empty(size=(in_channels, embed_dim)))
+        self.W2 = nn.Parameter(torch.empty(size=(2*in_channels, embed_dim)))
 #         self.W = nn.Parameter(torch.empty([embed_dim, in_channels]), requires_grad=True)
         self.a = nn.Parameter(torch.empty(embed_dim,1), requires_grad=True)
         self.bias = nn.Parameter(torch.empty(embed_dim), requires_grad=True) if bias else None
@@ -18,7 +19,8 @@ class GraphAttention(nn.Module):
         self.leaky_relu = nn.LeakyReLU(alpha)
         self.device  = device
         
-        nn.init.xavier_uniform_(self.W.data, gain=1.414)
+        nn.init.xavier_uniform_(self.W1.data, gain=1.414)
+        nn.init.xavier_uniform_(self.W2.data, gain=1.414)
         nn.init.xavier_uniform_(self.a.data, gain=1.414)
     def forward(self, x: torch.Tensor, adj: torch.Tensor = None):
         """
@@ -31,8 +33,7 @@ class GraphAttention(nn.Module):
         
         print('cuda device is :',self.device)
         print('0 input x shape :',x.shape)  # [B, N, in_channels]
-        hidden = torch.matmul(x,self.W)
-        print('1 hidden shape :',hidden.shape)  # [B, N, embed_dim]
+        hidden = torch.matmul(x,self.W1)  # [B, N, embed_dim]
         B = x.shape[0]
         N = x.shape[1]
         x_repeated_in_chunks = x.repeat_interleave(N, dim=1)
@@ -40,7 +41,8 @@ class GraphAttention(nn.Module):
         print(' x_repeated_alternating shape :',x_repeated_alternating.shape)   # [B, N*N, channels]  
         all_combinations_matrix = torch.cat([x_repeated_in_chunks, x_repeated_alternating], dim=1).view(B, N, N, 2 * self.in_channels)
         print(' all_combinations_matrix shape :',all_combinations_matrix.shape)     # [B, N, N, 2 * channels]
-        wx = torch.matmul(x,self.W)
+        wx = torch.matmul(all_combinations_matrix,self.W2)
+        print('3 wx shape :',wx.shape) # [B, N, N, embed_dim] 
         # leaky ReLU
         attn = self.leaky_relu(wx)   # [B, N, N, embed_dim]  
         print('3 leaky ReLU attn shape :',attn.shape)
@@ -48,13 +50,13 @@ class GraphAttention(nn.Module):
         print('2 attn shape:',attn.shape)      
         # adj
         zero_vec = -9e15*torch.ones_like(attn)
-        attn = torch.where(adj > 0, e, zero_vec)
+        attn = torch.where(adj > 0, attn, zero_vec)
         # softmax
         attention = F.softmax(attn, dim=-1)  # [B, N, N]
         print('4 attention softmax: ',attention.shape)
         # dropout
         attention = F.dropout(attention, self.dropout, training=self.training)
-        output = torch.matmul(attention,wx)  # [B, N, embed_dim]
+        output = torch.matmul(attention,hidden)  # [B, N, embed_dim]
         print('4 output: ',output.shape)
         # add bias
         if self.bias is not None:
@@ -101,7 +103,7 @@ class GAT(nn.Module):
             output = torch.cat([attn(x, adj) for attn in self.attns], dim=-1)
             print('output shape:',output.shape)    #  [2, 81, 512]
         else:
-            output = torch.mean(torch.stack([attn(x, adj) for attn in self.attns],dim=0),mean=0)  #  [2, 81, 64]
+            output = torch.mean(torch.stack([attn(x, adj) for attn in self.attns]),dim=0)  #  [2, 81, 64]
             print('output shape:',output.shape)
 #             output = sum([attn(x, adj) for attn in self.attns]) / len(self.attns)
         output = F.dropout(output, self.dropout, training=self.training)
