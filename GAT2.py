@@ -47,8 +47,8 @@ class GraphAttention(nn.Module):
         attn= torch.matmul(attn,self.a.to(self.device)).squeeze(-1) # [B, N, N]  
         print('2 attn shape:',attn.shape)      
         # adj
-        if adj is not None:
-            attn += torch.where(adj > 0.0, 0.0, -1e12)
+        zero_vec = -9e15*torch.ones_like(attn)
+        attn = torch.where(adj > 0, e, zero_vec)
         # softmax
         attention = F.softmax(attn, dim=-1)  # [B, N, N]
         print('4 attention softmax: ',attention.shape)
@@ -101,7 +101,9 @@ class GAT(nn.Module):
             output = torch.cat([attn(x, adj) for attn in self.attns], dim=-1)
             print('output shape:',output.shape)    #  [2, 81, 512]
         else:
-            output = sum([attn(x, adj) for attn in self.attns]) / len(self.attns)
+            output = torch.mean(torch.stack([attn(x, adj) for attn in self.attns],dim=0),mean=0)  #  [2, 81, 64]
+            print('output shape:',output.shape)
+#             output = sum([attn(x, adj) for attn in self.attns]) / len(self.attns)
         output = F.dropout(output, self.dropout, training=self.training)
         print('return out :',F.elu(output).shape)
         return F.elu(output)

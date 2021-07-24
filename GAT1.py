@@ -1,3 +1,8 @@
+'''
+ref Diego999
+https://github.com/Diego999/pyGAT
+'''
+
 import torch
 from torch import nn
 import sys
@@ -28,7 +33,7 @@ class GraphAttention(nn.Module):
             [torch.Tensor]: shape is [batch, nodes, embed_dim]
         """
         print('cuda device is :',self.device)
-        print('0 input x shape :',x.shape)
+        print('0 input x shape :',x.shape) # [B, N, C]
         hidden = torch.matmul(x,self.W)
         print('1 hidden shape :',hidden.shape)  # [B, N, embed_dim]
         B = hidden.shape[0]
@@ -41,18 +46,20 @@ class GraphAttention(nn.Module):
         attn= torch.matmul(all_combinations_matrix,self.a.to(self.device)).squeeze(-1) # [B, N, N]  
         print('2 attn shape:',attn.shape)      
         # leaky ReLU
-        attn = self.leaky_relu(attn)
+        attn = self.leaky_relu(attn)   # [B, N, N]  
         print('3 leaky ReLU attn shape :',attn.shape)
         # adj
-        if adj is not None:
-            attn += torch.where(adj > 0.0, 0.0, -1e12)
+        zero_vec = -9e15*torch.ones_like(attn)
+        attn = torch.where(adj > 0, e, zero_vec)
+#         if adj is not None:
+#             attn += torch.where(adj > 0.0, 0.0, -1e12)
         # softmax
         attention = F.softmax(attn, dim=-1)  # [B, N, N]
         print('4 attention softmax: ',attention.shape)
         # dropout
         attention = F.dropout(attention, self.dropout, training=self.training)
-        output = torch.matmul(attention,hidden)  # [B, N, embed_dim]
-        print('4 output: ',output.shape)
+        output = torch.matmul(attention,hidden)  #   atten [B,N,N] *  hidden [B,N,embed_dim = 64]     ---->  output [B, N, embed_dim]     feature * att_score
+        print('5 output: ',output.shape)
         # add bias
         if self.bias is not None:
             output += self.bias.to(self.device)
@@ -66,9 +73,10 @@ class GAT(nn.Module):
     """
 
     def __init__(self, device ,in_channels, embed_dim,
-                 n_heads=8, dropout=0.1, alpha=0.2, bias=True, aggregate='concat'):
+                 n_heads=8, dropout=0.1, alpha=0.2, bias=True):
         """
         Args:
+            aggregate='concat'
             in_channels ([type]): input channels
             embed_dim ([type]): output channels
             n_heads (int, optional): number of heads. Defaults to 64.
@@ -98,8 +106,10 @@ class GAT(nn.Module):
             output = torch.cat([attn(x, adj) for attn in self.attns], dim=-1)
             print('output shape:',output.shape)    #  [2, 81, 512]
         else:
-            output = sum([attn(x, adj) for attn in self.attns]) / len(self.attns)
-        output = F.dropout(output, self.dropout, training=self.training)
+            output = torch.mean(torch.stack([attn(x, adj) for attn in self.attns],dim=0),mean=0)  #  [2, 81, 64]
+            print('output shape:',output.shape)
+#             output = sum([attn(x, adj) for attn in self.attns]) / len(self.attns)
+        output = F.dropout(output, self.dropout, training=self.training)   #  [2, 81, 64]
         print('return out :',F.elu(output).shape)
         return F.elu(output)
     
