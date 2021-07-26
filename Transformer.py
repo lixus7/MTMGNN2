@@ -233,8 +233,7 @@ class Transformer_EncoderBlock(nn.Module):
         out = self.dropout(self.norm2(forward + x))
         return out
 
-### TBlock
-
+### TTransformer_EncoderLayer
 class TTransformer_EncoderLayer(nn.Module):
     def __init__(self, embed_size, time_num, heads ,forward_expansion, gpu, dropout):
         super(TTransformer_EncoderLayer, self).__init__()
@@ -330,7 +329,7 @@ def print_params(model_name, model):
 def main():
     GPU = sys.argv[-1] if len(sys.argv) == 2 else '7'
     device = torch.device("cuda:{}".format(GPU)) if torch.cuda.is_available() else torch.device("cpu")
-    model = T_Transformer(in_channels = CHANNEL, embed_size = 64, time_num = 82 , num_layers = 3, T_dim = INPUT_STEP, output_T_dim = PRED_STEP, heads = 1, forward_expansion = 4, gpu = device, dropout = 0).to(device)
+    model = T_Transformer(in_channels = CHANNEL, embed_size = 64, time_num = 82 , num_layers = 3, T_dim = INPUT_STEP, output_T_dim = PRED_STEP, heads = 8, forward_expansion = 4, gpu = device, dropout = 0).to(device)
     print_params('T_Transformer',model)
     summary(model, (CHANNEL, N_NODE, INPUT_STEP), device=device)
     
