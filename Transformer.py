@@ -220,11 +220,11 @@ class Transformer_EncoderBlock(nn.Module):
 #         D_T = self.one_hot(t, N, T)                          # temporal embedding选用one-hot方式 或者
         D_T = self.temporal_embedding(torch.arange(0, T).to(self.gpu))    # temporal embedding选用nn.Embedding
         D_T = D_T.expand(B, N, T, C)
-        print('query shape:',query.shape)
-        print('D_T shape:',D_T.shape)
+#         print('query shape:',query.shape)
+#         print('D_T shape:',D_T.shape)
         # temporal embedding加到query。 原论文采用concatenated
         query = query + D_T  
-        print('query + D_T shape:',query.shape)
+#         print('query + D_T shape:',query.shape)
         attention = self.attention(query, query, query)
 
         # Add skip connection, run through normalization and finally dropout
@@ -301,28 +301,24 @@ class T_Transformer(nn.Module):
         # 缩小通道数，降到1维。
         self.conv3 = nn.Conv2d(embed_size, 1, 1)
         self.relu = nn.ReLU()
+        self.Tanh = nn.Tanh()
     
     def forward(self, x):
         # input x shape[B, C, N, T]  C  = 2
         # C:通道数量。  N:传感器数量。  T:时间数量
         
-#         x = x.unsqueeze(0)
         
         input_Transformer = self.conv1(x)     #    x shape[B, 2, N, T]   --->    input_Transformer shape： [B, C = embed_size = 64, N, T] 
-#         input_Transformer = input_Transformer.squeeze(0)
-#         input_Transformer = input_Transformer.permute(1, 2, 0)
         input_Transformer = input_Transformer.permute(0, 2, 3, 1)    # 等号左边 input_Transformer shape: [B, N, T, C]
         output_Transformer = self.T_Transformer_block(input_Transformer)  # 等号左边 output_Transformer shape: # [B, N, T, C]
         output_Transformer = output_Transformer.permute(0, 2, 1, 3)   # 等号左边 output_Transformer shape: [B, T, N, C]
         
-#         output_Transformer = output_Transformer.unsqueeze(0)     
         out = self.relu(self.conv2(output_Transformer))    # 等号左边 out shape: [B, output_T_dim = PRED_STEP, N, C]        
         out = out.permute(0, 3, 2, 1)           # 等号左边 out shape: [B, C, N, output_T_dim = PRED_STEP]
         out = self.conv3(out)                   # 等号左边 out shape: [B, 1, N, output_T_dim = PRED_STEP]   
         out = out.squeeze(1)
            
         return out      #[B, N, output_dim]
-        # return out shape: [B, N, output_dim]
 def print_params(model_name, model):
     param_count=0
     for name, param in model.named_parameters():
@@ -334,7 +330,7 @@ def print_params(model_name, model):
 def main():
     GPU = sys.argv[-1] if len(sys.argv) == 2 else '7'
     device = torch.device("cuda:{}".format(GPU)) if torch.cuda.is_available() else torch.device("cpu")
-    model = T_Transformer(in_channels = CHANNEL, embed_size = 64, time_num = 82 , num_layers = 3, T_dim = INPUT_STEP, output_T_dim = PRED_STEP, heads = 8, forward_expansion = 4, gpu = device, dropout = 0).to(device)
+    model = T_Transformer(in_channels = CHANNEL, embed_size = 64, time_num = 82 , num_layers = 3, T_dim = INPUT_STEP, output_T_dim = PRED_STEP, heads = 1, forward_expansion = 4, gpu = device, dropout = 0).to(device)
     print_params('T_Transformer',model)
     summary(model, (CHANNEL, N_NODE, INPUT_STEP), device=device)
     
