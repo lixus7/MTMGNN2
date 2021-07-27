@@ -1,22 +1,6 @@
 # Metro
 
-Default ---  minmax normalization
-Baseline：                                            RMSE        MSE      MAE       MAPE
-STGCN    -   		                        1383.155    37.191   21.296    23.045 
 
-GATv1+TCN(stgcn                 best  1270.037    35.637     20.692    22.96                     Training time    60s/epoch
-		(z-score)                 best  1329.551    36.463     20.656    22.16                     Training time    60s/epoch
-1.1 GAT_DGL+ TCN(stgcn           best  1250.252    35.358     20.587    23.09                      Training time    10s/epoch
-                      (z-score)                best  1282.515    35.812     20.649    22.81                      Training time    10s/epoch                  
-GCN+GAT+ TCN(stgcn          best  1269          35.63       20.59      22.88                      Training time    88s/epoch 
-		(z-score)                 best                                                                               Training time    88s/epoch 
-2.2 GCN+GAT_DGl+ TCN(stgcn  best  1237.712   35.181    20.489   22.88                       Training time    12s/epoch 
-		(z-score)                best   1282.160    35.807    20.584   21.86                       Training time    12s/epoch 
-
-Baseline：                                            RMSE        MSE      MAE       MAPE
-Transformer   -                                    1791.97    42.332    24.498    31.764                       Training time    2s/epoch
-
-GAT+Transformer (cat x)	          1695.057 41.171   23.683   30.848                      Training time    42s/epoch
 ![image](https://user-images.githubusercontent.com/49853448/127173903-dc0753ea-d7d9-486a-8658-4fddb4e47032.png)
 
 ************************************************************************************************************************
